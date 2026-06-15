@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" class="anim">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blog — TraffiCure · Traffic Intelligence, Unpacked</title>
+<meta name="description" content="Data-driven insights on urban mobility, smart city technology, and how software is reshaping traffic management." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   TOKENS  (mirrors css/style.css + rmi.html)
+   ============================================================ */
+:root{
+  --ink:#07291B; --paper:#EFFFF6; --pulse-hot:#EFFFF6; --pulse:#B8F5D2; --leaf:#2E8F5F;
+  --ink-25:rgba(7,41,27,.25); --ink-45:rgba(7,41,27,.45); --ink-12:rgba(7,41,27,.12);
+  --ink-07:rgba(7,41,27,.07); --paper-45:rgba(239,255,246,.45); --paper-20:rgba(239,255,246,.20);
+  --paper-10:rgba(239,255,246,.10);
+  --t-clear:#3DDC68; --t-slow:#FFC53D; --t-jam:#FF4136; --amber:#B07F1A;
+  --f-disp:'Archivo',system-ui,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+  --f-acc:'Fraunces',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--f-disp);background:var(--paper);color:var(--ink);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+.sec{position:relative;padding:13vh clamp(20px,7vw,120px);overflow:hidden}
+.sec > *{position:relative;z-index:2}
+.sec::before{content:"";position:absolute;inset:0;z-index:0;
+  background-image:radial-gradient(var(--dot,var(--ink-12)) 1px,transparent 1.7px);background-size:15px 15px;opacity:.6;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent);}
+.ink{background:var(--ink);color:var(--paper);--dot:rgba(46,143,95,.30)}
+.paper{background:var(--paper);color:var(--ink);--dot:var(--ink-12)}
+.ink a{color:var(--pulse)}
+.wrap{max-width:1180px;margin:0 auto}
+
+.eyebrow{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:10px;color:var(--leaf);margin-bottom:26px}
+.ink .eyebrow{color:var(--pulse)}
+.eyebrow::after{content:"";width:34px;height:1px;background:currentColor;opacity:.4}
+
+h1,h2,h3{font-family:var(--f-disp);font-weight:800;letter-spacing:-.025em;line-height:1.02}
+h1{font-size:clamp(46px,8vw,108px);font-weight:900}
+h2{font-size:clamp(30px,4.6vw,60px);margin-bottom:.4em}
+h3{font-size:clamp(19px,1.9vw,25px);letter-spacing:-.015em}
+em,.acc{font-family:var(--f-acc);font-style:italic;font-weight:400}
+.lede{font-size:clamp(17px,1.55vw,21px);max-width:62ch;line-height:1.62;color:var(--ink-45)}
+.ink .lede{color:var(--paper-45)}
+strong{font-weight:700;color:inherit}
+
+/* ORB → back to home */
+.orb{position:fixed;right:clamp(14px,2.4vw,34px);top:50%;transform:translateY(-50%);z-index:60;width:60px;height:60px;
+  border-radius:50%;background:var(--ink);border:1px solid var(--leaf);cursor:pointer;display:grid;place-items:center;
+  text-decoration:none;box-shadow:0 8px 30px rgba(7,41,27,.35);animation:bob 4.2s ease-in-out infinite}
+.orb svg{width:30px;height:30px}
+.orb::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid var(--leaf);opacity:.5;animation:ring 2.6s ease-out infinite}
+.orb .tip{position:absolute;right:74px;white-space:nowrap;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);background:var(--pulse);padding:6px 11px;border-radius:40px;opacity:0;transform:translateX(6px);transition:.25s;pointer-events:none}
+.orb:hover .tip,.orb:focus-visible .tip{opacity:1;transform:translateX(0)}
+@keyframes bob{0%,100%{transform:translateY(-50%)}50%{transform:translateY(calc(-50% - 7px))}}
+@keyframes ring{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.7);opacity:0}}
+
+/* HERO */
+.hero{min-height:78svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.hero .eyebrow{justify-content:center}
+.hero h1{margin:.16em auto .3em;max-width:14ch}
+.hero .lede{max-width:56ch;margin:0 auto}
+
+/* SEARCH/FILTER STRIP (chips) */
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:38px}
+.chip{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:9px 15px;border-radius:40px;border:1px solid var(--paper-20);color:var(--paper-45);cursor:pointer;transition:.2s;background:none}
+.chip:hover,.chip[aria-pressed="true"]{border-color:var(--pulse);color:var(--pulse)}
+
+/* SECTION HEAD */
+.head{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:38px}
+.head .eyebrow{margin-bottom:0}
+.head .all{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--leaf);text-decoration:none}
+.head .all:hover{color:var(--ink)}
+
+/* FEATURED POST */
+.feat{display:grid;grid-template-columns:1.05fr .95fr;gap:0;border:1px solid var(--ink-12);border-radius:22px;overflow:hidden;background:rgba(255,255,255,.6);margin-bottom:26px}
+.feat a{text-decoration:none;color:inherit;display:contents}
+.feat .copy{padding:clamp(28px,3.4vw,46px);display:flex;flex-direction:column;justify-content:center}
+.feat .tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--leaf);margin-bottom:16px;display:inline-flex;gap:9px;align-items:center}
+.feat .tag .dot{width:7px;height:7px;border-radius:50%;background:var(--t-clear)}
+.feat h2{font-size:clamp(26px,3vw,42px);margin-bottom:14px}
+.feat p{font-size:15.5px;line-height:1.62;color:var(--ink-45);max-width:48ch}
+.feat .meta{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;color:var(--ink-45);margin-top:22px}
+.feat .art{position:relative;background:var(--ink);min-height:280px;overflow:hidden}
+.feat .art::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(46,143,95,.55) 1.1px,transparent 1.9px);background-size:13px 13px;opacity:.9;
+  -webkit-mask-image:radial-gradient(120% 120% at 70% 30%,#000 35%,transparent 78%);mask-image:radial-gradient(120% 120% at 70% 30%,#000 35%,transparent 78%)}
+.feat .art .read{position:absolute;left:24px;bottom:22px;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--pulse);display:inline-flex;gap:8px;align-items:center}
+.feat:hover .art .read .arr{transform:translateX(4px)}
+.feat .art .read .arr{transition:transform .22s}
+
+/* CARD GRID */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.post{border:1px solid var(--ink-12);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.6);
+  text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .22s,box-shadow .22s,border-color .22s}
+.post:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(7,41,27,.1);border-color:var(--ink-25)}
+.post .thumb{position:relative;height:150px;background:var(--ink);overflow:hidden}
+.post .thumb::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(46,143,95,.5) 1px,transparent 1.7px);background-size:12px 12px;opacity:.85}
+.post .thumb::after{content:"";position:absolute;inset:0;background:var(--m,radial-gradient(90% 90% at 30% 20%,rgba(61,220,104,.22),transparent 70%))}
+.post .body{padding:22px 22px 24px;display:flex;flex-direction:column;flex:1}
+.post .tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--leaf);margin-bottom:13px}
+.post h3{margin-bottom:10px;line-height:1.16}
+.post p{font-size:14px;line-height:1.58;color:var(--ink-45);flex:1}
+.post .meta{font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;color:var(--ink-45);margin-top:18px;padding-top:14px;border-top:1px solid var(--ink-07);display:flex;justify-content:space-between}
+
+/* NEWSLETTER (ink) */
+.sub{display:flex;flex-direction:column;align-items:center;text-align:center}
+.sub h2{max-width:18ch;margin:0 auto .4em}
+.sub .lede{margin:0 auto 32px}
+.sub-form{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;width:100%;max-width:520px}
+.sub-form input{flex:1;min-width:220px;font-family:var(--f-mono);font-size:13px;padding:15px 18px;border-radius:40px;
+  border:1px solid var(--paper-20);background:rgba(239,255,246,.04);color:var(--paper)}
+.sub-form input::placeholder{color:var(--paper-45)}
+.sub-form input:focus{outline:none;border-color:var(--pulse)}
+.btn{font-family:var(--f-mono);font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:15px 24px;border-radius:40px;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;gap:10px;transition:.22s;border:1px solid transparent}
+.btn-mint{background:var(--pulse);color:var(--ink)}
+.btn-mint:hover{background:var(--pulse-hot);transform:translateY(-2px)}
+.btn .arr{transition:transform .22s}.btn:hover .arr{transform:translateX(4px)}
+.sub .note{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--paper-45);margin-top:16px}
+
+/* FOOTER */
+footer{background:var(--ink);color:var(--paper);padding:48px clamp(20px,7vw,120px);text-align:center}
+footer .lockup{font-family:var(--f-disp);font-weight:800;font-size:22px;letter-spacing:-.02em}
+footer .lockup em{font-family:var(--f-acc);font-style:italic;font-weight:400;color:var(--pulse)}
+footer .meta{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;color:var(--paper-45);margin-top:12px}
+
+/* REVEAL */
+html.anim .rv{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+html.anim .rv.in{opacity:1;transform:none}
+html.anim .rv-d1{transition-delay:.07s}html.anim .rv-d2{transition-delay:.14s}html.anim .rv-d3{transition-delay:.21s}
+
+@media(max-width:900px){.feat{grid-template-columns:1fr}.feat .art{min-height:200px;order:-1}.grid{grid-template-columns:1fr}.orb{width:50px;height:50px}.orb svg{width:25px;height:25px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.orb,.orb::after{animation:none}html.anim .rv{opacity:1;transform:none;transition:none}.post:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<a class="orb" href="index.html" aria-label="Back to TraffiCure home">
+  <span class="tip">Back to home</span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="#B8F5D2" stroke-width="1.3">
+    <circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="3.6" ry="9"/><line x1="3" y1="12" x2="21" y2="12"/>
+  </svg>
+</a>
+
+<!-- ============ HERO ============ -->
+<header class="sec ink hero">
+  <div class="wrap">
+    <span class="eyebrow rv">Insights &amp; updates</span>
+    <h1 class="rv rv-d1">Traffic intelligence, <em>unpacked.</em></h1>
+    <p class="lede rv rv-d2">Data-driven insights on urban mobility, smart city technology, and how software is reshaping traffic management.</p>
+    <div class="chips rv rv-d3" role="group" aria-label="Filter posts">
+      <button class="chip" aria-pressed="true">All</button>
+      <button class="chip">RMI</button>
+      <button class="chip">Methodology</button>
+      <button class="chip">Case Studies</button>
+      <button class="chip">Product</button>
+      <button class="chip">Smart Cities</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ LATEST + FEATURED ============ -->
+<section class="sec paper">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Featured</span>
+      <a class="all" href="#all">All posts →</a>
+    </div>
+
+    <article class="feat rv rv-d1">
+      <a href="#">
+        <div class="copy">
+          <span class="tag"><span class="dot"></span>RMI</span>
+          <h2>Google opened the traffic vault. Here's what actually changed.</h2>
+          <p>For eighteen years the planet's best traffic dataset powered a billion phones but never reached the people running the roads. Roads Management Insights changes that — and we deploy it. The plain-English breakdown.</p>
+          <div class="meta">June 2026 · 9 min read</div>
+        </div>
+        <div class="art"><span class="read">Read the guide <span class="arr">→</span></span></div>
+      </a>
+    </article>
+  </div>
+</section>
+
+<!-- ============ POST GRID ============ -->
+<section class="sec paper" id="all" style="padding-top:0">
+  <div class="wrap">
+    <div class="head rv"><span class="eyebrow">Latest posts</span></div>
+    <div class="grid">
+
+      <a class="post rv rv-d1" href="#" style="--m:radial-gradient(90% 90% at 30% 20%,rgba(61,220,104,.22),transparent 70%)">
+        <div class="thumb"></div>
+        <div class="body">
+          <span class="tag">Methodology</span>
+          <h3>Why software beats cameras across 85% of your network</h3>
+          <p>Cameras see 3% of the road. Bluetooth detectors maybe 15%. Here's how consumer-movement data fills the rest with zero hardware.</p>
+          <div class="meta"><span>June 2026</span><span>6 min</span></div>
+        </div>
+      </a>
+
+      <a class="post rv rv-d2" href="#" style="--m:radial-gradient(90% 90% at 70% 25%,rgba(255,65,54,.20),transparent 70%)">
+        <div class="thumb"></div>
+        <div class="body">
+          <span class="tag">Safety</span>
+          <h3>What harsh-braking data tells you before the crashes do</h3>
+          <p>Clusters of hard stops are the first network-scale proxy for road-design risk — visible without new instrumentation, ahead of police data.</p>
+          <div class="meta"><span>May 2026</span><span>5 min</span></div>
+        </div>
+      </a>
+
+      <a class="post rv rv-d3" href="#" style="--m:radial-gradient(90% 90% at 40% 30%,rgba(184,245,210,.28),transparent 70%)">
+        <div class="thumb"></div>
+        <div class="body">
+          <span class="tag">Field Playbook</span>
+          <h3>Deploying RMI in four weeks: a step-by-step playbook</h3>
+          <p>Contract, Roads Selection API, BigQuery, Pub/Sub, then the activation layer. The realistic timeline from signature to a live dashboard.</p>
+          <div class="meta"><span>May 2026</span><span>8 min</span></div>
+        </div>
+      </a>
+
+      <a class="post rv rv-d1" href="#" style="--m:radial-gradient(90% 90% at 60% 20%,rgba(255,197,61,.20),transparent 70%)">
+        <div class="thumb"></div>
+        <div class="body">
+          <span class="tag">Case Study</span>
+          <h3>Before &amp; after: settling a signal-retiming argument in a week</h3>
+          <p>Every authority has one geometric change they argued about for months. With live data, the argument resolves in days — with evidence.</p>
+          <div class="meta"><span>Apr 2026</span><span>7 min</span></div>
+        </div>
+      </a>
+
+      <a class="post rv rv-d2" href="#" style="--m:radial-gradient(90% 90% at 30% 30%,rgba(61,220,104,.18),transparent 70%)">
+        <div class="thumb"></div>
+        <div class="body">
+          <span class="tag">Compare</span>
+          <h3>RMI vs INRIX vs TomTom Move: the honest comparison</h3>
+          <p>What we'd switch off, what we'd run in parallel, and what each actually costs at scale — from a team that has deployed all three.</p>
+          <div class="meta"><span>Apr 2026</span><span>10 min</span></div>
+        </div>
+      </a>
+
+      <a class="post rv rv-d3" href="#" style="--m:radial-gradient(90% 90% at 70% 30%,rgba(184,245,210,.24),transparent 70%)">
+        <div class="thumb"></div>
+        <div class="body">
+          <span class="tag">Product</span>
+          <h3>From data to cure: how TraffiCure scores choke points</h3>
+          <p>Our scoring framework ranks failing corridors so operators act on the worst first — measure, diagnose, treat, on a single pipeline.</p>
+          <div class="meta"><span>Mar 2026</span><span>6 min</span></div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ NEWSLETTER ============ -->
+<section class="sec ink">
+  <div class="wrap sub">
+    <span class="eyebrow rv">Subscribe</span>
+    <h2 class="rv rv-d1">One email when something <em>worth reading</em> ships.</h2>
+    <p class="lede rv rv-d1">New deployments, RMI feed updates, and field notes from the road. No noise.</p>
+    <div class="sub-form rv rv-d2">
+      <input type="email" placeholder="you@agency.gov" aria-label="Email address" />
+      <a class="btn btn-mint" href="#">Subscribe <span class="arr">→</span></a>
+    </div>
+    <div class="note rv rv-d2">Unsubscribe any time. We don't share your address.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="lockup">Traffi<em>Cure</em></div>
+  <div class="meta">Software-first traffic intelligence · Powered by Google Maps · Lepton Software · ©2026</div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce){
+    var io = new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
+    document.querySelectorAll('.rv').forEach(function(el){io.observe(el);});
+  } else { document.documentElement.classList.remove('anim'); }
+
+  // chip filter toggle (visual only until posts carry categories)
+  var chips = document.querySelectorAll('.chip');
+  chips.forEach(function(c){ c.addEventListener('click', function(){
+    chips.forEach(function(x){x.setAttribute('aria-pressed','false');});
+    c.setAttribute('aria-pressed','true');
+  });});
+})();
+</script>
+<script src="js/page-transition.js"></script>
+</body>
+</html>

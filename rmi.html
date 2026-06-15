@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en" class="anim">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Roads Management Insights — TraffiCure</title>
+<meta name="description" content="Google's first public-sector traffic data product, explained by the partner who deploys it. What RMI is, what shipped this month, how it compares, and what eight months of deployments taught us." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   TOKENS  (mirrors css/style.css)
+   ============================================================ */
+:root{
+  --ink:#07291B;
+  --paper:#EFFFF6;
+  --pulse-hot:#EFFFF6;
+  --pulse:#B8F5D2;
+  --leaf:#2E8F5F;
+  --ink-25:rgba(7,41,27,.25);
+  --ink-45:rgba(7,41,27,.45);
+  --ink-12:rgba(7,41,27,.12);
+  --ink-07:rgba(7,41,27,.07);
+  --paper-45:rgba(239,255,246,.45);
+  --paper-20:rgba(239,255,246,.20);
+  --paper-10:rgba(239,255,246,.10);
+  --t-clear:#3DDC68;
+  --t-slow:#FFC53D;
+  --t-jam:#FF4136;
+  --amber:#B07F1A;
+  --f-disp:'Archivo',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+  --f-acc:'Fraunces',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--f-disp);
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.5;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ============================================================
+   HALFTONE BACKDROP — duotone dot field per surface
+   ============================================================ */
+.sec{position:relative;padding:13vh clamp(20px,7vw,120px);overflow:hidden}
+.sec > *{position:relative;z-index:2}
+.sec::before{
+  content:"";position:absolute;inset:0;z-index:0;
+  background-image:radial-gradient(var(--dot,var(--ink-12)) 1px,transparent 1.7px);
+  background-size:15px 15px;
+  opacity:.6;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent);
+}
+.ink{background:var(--ink);color:var(--paper);--dot:rgba(46,143,95,.30)}
+.paper{background:var(--paper);color:var(--ink);--dot:var(--ink-12)}
+.ink a{color:var(--pulse)}
+
+.wrap{max-width:1180px;margin:0 auto}
+
+/* ============================================================
+   SHARED TYPE
+   ============================================================ */
+.eyebrow{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:10px;
+  color:var(--leaf);margin-bottom:26px;
+}
+.ink .eyebrow{color:var(--pulse)}
+.eyebrow .num{color:inherit;opacity:.7}
+.eyebrow::after{content:"";width:34px;height:1px;background:currentColor;opacity:.4}
+
+h1,h2,h3{font-family:var(--f-disp);font-weight:800;letter-spacing:-.025em;line-height:1.02}
+h1{font-size:clamp(46px,8vw,108px);font-weight:900}
+h2{font-size:clamp(34px,5.4vw,76px);margin-bottom:.5em}
+h3{font-size:clamp(20px,2vw,27px);letter-spacing:-.015em}
+em,.acc{font-family:var(--f-acc);font-style:italic;font-weight:400}
+.lede{font-size:clamp(17px,1.55vw,21px);max-width:62ch;line-height:1.62;color:var(--ink-45)}
+.ink .lede{color:var(--paper-45)}
+p.body{font-size:clamp(15px,1.15vw,17px);line-height:1.66;max-width:68ch;color:var(--ink-45);margin-left:auto;margin-right:auto;text-align:center}
+.ink p.body{color:var(--paper-45)}
+strong{font-weight:700;color:inherit}
+
+/* ============================================================
+   ORB — links back / floats; on this page it's "back to home"
+   ============================================================ */
+.orb{
+  position:fixed;right:clamp(14px,2.4vw,34px);top:50%;transform:translateY(-50%);
+  z-index:60;width:60px;height:60px;border-radius:50%;
+  background:var(--ink);border:1px solid var(--leaf);cursor:pointer;
+  display:grid;place-items:center;text-decoration:none;
+  box-shadow:0 8px 30px rgba(7,41,27,.35);
+  animation:bob 4.2s ease-in-out infinite;
+}
+.orb svg{width:30px;height:30px}
+.orb::after{
+  content:"";position:absolute;inset:-7px;border-radius:50%;
+  border:1px solid var(--leaf);opacity:.5;animation:ring 2.6s ease-out infinite;
+}
+.orb .tip{
+  position:absolute;right:74px;white-space:nowrap;
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink);background:var(--pulse);padding:6px 11px;border-radius:40px;
+  opacity:0;transform:translateX(6px);transition:.25s;pointer-events:none;
+}
+.orb:hover .tip,.orb:focus-visible .tip{opacity:1;transform:translateX(0)}
+@keyframes bob{0%,100%{transform:translateY(-50%)}50%{transform:translateY(calc(-50% - 7px))}}
+@keyframes ring{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.7);opacity:0}}
+
+/* ============================================================
+   BADGE / PILL
+   ============================================================ */
+.badge{
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:var(--f-mono);font-size:11.5px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  padding:8px 14px;border-radius:40px;border:1px solid var(--ink-25);color:var(--ink-45);
+}
+.ink .badge{border-color:var(--paper-20);color:var(--paper-45)}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--t-clear);box-shadow:0 0 0 3px rgba(61,220,104,.2)}
+.badge.live .dot{animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{min-height:96svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.hero .eyebrow{justify-content:center}
+.hero h1{margin:.18em auto .32em;max-width:16ch}
+.hero .lede{max-width:58ch;margin:0 auto 40px}
+.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:46px;justify-content:center}
+.btn{
+  font-family:var(--f-mono);font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:15px 24px;border-radius:40px;text-decoration:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:10px;transition:.22s;border:1px solid transparent;
+}
+.btn-mint{background:var(--pulse);color:var(--ink)}
+.btn-mint:hover{background:var(--pulse-hot);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--paper);border-color:var(--paper-20)}
+.btn-ghost:hover{border-color:var(--pulse);color:var(--pulse)}
+.paper .btn-ghost{color:var(--ink);border-color:var(--ink-25)}
+.paper .btn-ghost:hover{border-color:var(--leaf);color:var(--leaf)}
+.btn .arr{transition:transform .22s}
+.btn:hover .arr{transform:translateX(4px)}
+
+.ticks{display:flex;flex-wrap:wrap;gap:14px 30px;justify-content:center}
+.tick{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:12.5px;letter-spacing:.04em;color:var(--paper-45)}
+.tick svg{width:16px;height:16px;color:var(--t-clear);flex:none}
+
+/* ============================================================
+   GENERIC SECTION HEAD
+   ============================================================ */
+.head{margin:0 auto 46px;text-align:center}
+.head h2{max-width:20ch;margin-left:auto;margin-right:auto}
+.head .eyebrow{justify-content:center}
+.head .lede{max-width:64ch;margin:22px auto 0}
+
+/* ============================================================
+   03 — PRIMITIVE CARDS
+   ============================================================ */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{
+  border:1px solid var(--paper-20);border-radius:18px;padding:30px 26px 32px;
+  background:rgba(239,255,246,.03);position:relative;overflow:hidden;
+}
+.paper .card{border-color:var(--ink-12);background:rgba(255,255,255,.55)}
+.card .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--leaf);margin-bottom:18px}
+.ink .card .k{color:var(--pulse)}
+.card h3{margin-bottom:12px}
+.card p{font-size:14.5px;line-height:1.62;color:var(--paper-45)}
+.paper .card p{color:var(--ink-45)}
+.card .pipe{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--leaf);
+  margin-top:18px;padding-top:16px;border-top:1px solid var(--paper-10);
+}
+.paper .card .pipe{border-top-color:var(--ink-07);color:var(--leaf)}
+
+.pipeline-note{
+  margin-top:24px;font-family:var(--f-mono);font-size:12.5px;letter-spacing:.04em;
+  color:var(--paper-45);display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+}
+.pipeline-note .step{padding:7px 13px;border:1px solid var(--paper-20);border-radius:40px}
+.pipeline-note .to{opacity:.5}
+
+/* ============================================================
+   04 — NEW FEEDS
+   ============================================================ */
+.feed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:34px}
+.feed{
+  border:1px solid var(--ink-12);border-radius:18px;padding:28px 24px;background:rgba(255,255,255,.6);
+}
+.feed .meta{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--leaf);margin-bottom:16px}
+.feed h3{margin-bottom:8px}
+.feed .tagline{font-family:var(--f-acc);font-style:italic;font-size:18px;color:var(--ink);margin-bottom:14px}
+.feed p{font-size:14px;line-height:1.6;color:var(--ink-45)}
+
+.timeline{display:flex;flex-direction:column;gap:0;margin-top:18px;border-top:1px dashed var(--ink-12);padding-top:14px}
+.tl-row{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;padding:7px 0;font-family:var(--f-mono);font-size:12px}
+.tl-row .t{color:var(--leaf);text-align:right}
+.tl-row .e{color:var(--ink-45);display:flex;align-items:center;gap:9px}
+.tl-row .e::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--dotcol,var(--t-slow))}
+.tl-row.acc .e::before{background:var(--t-jam)}
+.tl-row.stop .e::before{background:var(--t-slow)}
+.tl-row.clear .e::before{background:var(--t-clear)}
+.tl-row.haz .e::before{background:var(--amber)}
+
+.quote{
+  margin:36px auto 0;border-left:3px solid var(--leaf);padding:6px 0 6px 26px;max-width:60ch;text-align:left;
+}
+.quote p{font-family:var(--f-acc);font-style:italic;font-size:clamp(20px,2.3vw,30px);line-height:1.35;color:var(--ink)}
+.quote .cite{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-45);margin-top:16px}
+
+/* ============================================================
+   05 — CHANGES (ink)
+   ============================================================ */
+.changes{display:grid;grid-template-columns:1fr 1fr;gap:22px 40px;margin-top:10px}
+.change{border-top:1px solid var(--paper-20);padding-top:20px}
+.change h3{margin-bottom:12px;color:var(--pulse)}
+.change h3 .lab{font-family:var(--f-acc);font-style:italic;color:var(--paper)}
+.change p{font-size:15px;line-height:1.62;color:var(--paper-45)}
+
+/* ============================================================
+   06 — COMPARISON TABLE
+   ============================================================ */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:8px}
+table.cmp{width:100%;border-collapse:collapse;min-width:680px;font-size:14.5px}
+table.cmp th,table.cmp td{text-align:left;padding:16px 18px;vertical-align:top}
+table.cmp thead th{
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  background:var(--ink);color:var(--paper);font-weight:500;
+}
+table.cmp thead th:first-child{border-radius:12px 0 0 0}
+table.cmp thead th:last-child{border-radius:0 12px 0 0}
+table.cmp tbody tr:nth-child(even){background:var(--ink-07)}
+table.cmp td.dim{font-family:var(--f-mono);font-size:13px;letter-spacing:.02em;color:var(--ink-45);white-space:nowrap}
+table.cmp td.rmi{font-weight:700;color:var(--ink)}
+table.cmp td.alt{font-family:var(--f-mono);font-size:13px;color:var(--amber)}
+table.cmp td.win{font-size:13.5px;color:var(--leaf)}
+table.cmp tbody tr{border-bottom:1px solid var(--ink-07)}
+
+/* ============================================================
+   07 — LIMITS
+   ============================================================ */
+.limits{display:grid;grid-template-columns:1fr 1fr;gap:22px 40px}
+.limit{border-left:2px solid var(--t-jam);padding:4px 0 4px 22px}
+.limit h3{margin-bottom:10px}
+.limit p{font-size:14.5px;line-height:1.6;color:var(--ink-45)}
+
+/* ============================================================
+   08 — ACTIVATION PATHS
+   ============================================================ */
+.paths{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:26px}
+.path{border:1px solid var(--ink-12);border-radius:18px;padding:28px 24px;background:rgba(255,255,255,.6);display:flex;flex-direction:column}
+.path .p-k{font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--leaf);margin-bottom:14px}
+.path h3{margin-bottom:12px}
+.path p{font-size:14px;line-height:1.6;color:var(--ink-45);flex:1}
+.path .speed{margin-top:18px;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;color:var(--ink);padding-top:14px;border-top:1px solid var(--ink-07)}
+.path .speed b{color:var(--leaf)}
+
+/* ============================================================
+   09 — FIELD NOTES (ink)
+   ============================================================ */
+.notes{display:flex;flex-direction:column;gap:0}
+.note{border-top:1px solid var(--paper-20);padding:26px 0;display:grid;grid-template-columns:54px 1fr;gap:22px}
+.note .n{font-family:var(--f-mono);font-size:13px;color:var(--leaf)}
+.note h3{margin-bottom:12px;color:var(--paper);max-width:30ch}
+.note h3 em{color:var(--pulse)}
+.note p{font-size:15px;line-height:1.62;color:var(--paper-45)}
+
+/* ============================================================
+   10 — CLOSER + CTA
+   ============================================================ */
+.closer{text-align:center}
+.closer .eyebrow{justify-content:center}
+.closer .lede{margin:22px auto 38px}
+.closer h2{margin-left:auto;margin-right:auto}
+.cta-band{text-align:left}
+.cta-band{
+  margin-top:40px;border:1px solid var(--ink-12);border-radius:22px;
+  padding:clamp(30px,4vw,52px);background:rgba(255,255,255,.6);
+  display:flex;flex-wrap:wrap;gap:22px;align-items:center;justify-content:space-between;
+}
+.cta-band .ct h3{margin-bottom:8px}
+.cta-band .ct p{font-size:14.5px;color:var(--ink-45);max-width:46ch}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq{display:flex;flex-direction:column;gap:0;max-width:880px;margin-top:8px}
+details.q{border-bottom:1px solid var(--ink-12)}
+details.q summary{
+  list-style:none;cursor:pointer;padding:22px 44px 22px 0;position:relative;
+  font-family:var(--f-disp);font-weight:600;font-size:clamp(16px,1.5vw,20px);letter-spacing:-.01em;
+}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary::after{
+  content:"+";position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  font-family:var(--f-mono);font-size:22px;color:var(--leaf);transition:transform .25s;
+}
+details.q[open] summary::after{content:"–"}
+details.q .a{padding:0 44px 24px 0;font-size:15px;line-height:1.66;color:var(--ink-45);max-width:72ch}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{background:var(--ink);color:var(--paper);padding:48px clamp(20px,7vw,120px);text-align:center}
+footer .lockup{font-family:var(--f-disp);font-weight:800;font-size:22px;letter-spacing:-.02em}
+footer .lockup em{font-family:var(--f-acc);font-style:italic;font-weight:400;color:var(--pulse)}
+footer .meta{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;color:var(--paper-45);margin-top:12px}
+
+/* ============================================================
+   REVEAL
+   ============================================================ */
+html.anim .rv{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+html.anim .rv.in{opacity:1;transform:none}
+html.anim .rv-d1{transition-delay:.08s}
+html.anim .rv-d2{transition-delay:.16s}
+html.anim .rv-d3{transition-delay:.24s}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:900px){
+  .grid3,.feed-grid,.paths{grid-template-columns:1fr}
+  .changes,.limits{grid-template-columns:1fr}
+  .orb{width:50px;height:50px}.orb svg{width:25px;height:25px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .orb,.orb::after,.badge.live .dot{animation:none}
+  html.anim .rv{opacity:1;transform:none;transition:none}
+}
+/* ============================================================
+   STACKING CARDS — panels pin and the previous recedes as the
+   next slides up over it. Desktop + motion-ok only; otherwise
+   normal document flow (no clipping on mobile / reduced-motion).
+   ============================================================ */
+@media (min-width:900px) and (prefers-reduced-motion:no-preference){
+  body{background:var(--ink)}
+  .stack-card{
+    position:sticky;top:0;min-height:100svh;
+    display:flex;flex-direction:column;justify-content:center;
+    padding-top:9vh;padding-bottom:9vh;
+    border-radius:30px 30px 0 0;overflow:hidden;
+    transform-origin:50% 0;will-change:transform,filter;
+    box-shadow:0 -1px 0 rgba(255,255,255,.06),0 -34px 70px rgba(0,0,0,.4);
+  }
+  .stack-card.hero{min-height:100svh}
+}
+</style>
+</head>
+<body>
+
+<!-- ORB: returns to landing page -->
+<a class="orb" href="index.html" aria-label="Back to TraffiCure home">
+  <span class="tip">Back to home</span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="#B8F5D2" stroke-width="1.3">
+    <circle cx="12" cy="12" r="9"/>
+    <ellipse cx="12" cy="12" rx="9" ry="3.6"/>
+    <ellipse cx="12" cy="12" rx="3.6" ry="9"/>
+    <line x1="3" y1="12" x2="21" y2="12"/>
+  </svg>
+</a>
+
+<!-- ============ HERO ============ -->
+<header class="sec stack-card ink hero">
+  <div class="wrap">
+    <span class="eyebrow rv">01 · The complete guide</span>
+    <h1 class="rv rv-d1">Roads Management <em>Insights.</em></h1>
+    <p class="lede rv rv-d2">Google's first public-sector traffic data product, explained by the partner who deploys it — what RMI is, what shipped this month, how it stacks up against INRIX, TomTom Move, and sensors, and what eight months of real deployments have taught us.</p>
+    <div class="cta-row rv rv-d2">
+      <a class="btn btn-mint" href="#contact">Activate RMI for your city <span class="arr">→</span></a>
+      <a class="btn btn-ghost" href="#product">How RMI works</a>
+    </div>
+    <div class="ticks rv rv-d3">
+      <span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg>15-year Google Maps Platform partner</span>
+      <span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg>Activates in 4 to 8 weeks</span>
+      <span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg>Live in Pune, deploying globally</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 02 BACKSTORY ============ -->
+<section class="sec stack-card paper">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow"><span class="num">02</span> · The backstory</span>
+      <h2>Why Google opened the <em>vault</em> now.</h2>
+    </div>
+    <p class="body rv rv-d1" style="margin-bottom:18px">For eighteen years the most useful traffic dataset on the planet powered the blue, yellow, and red lines on a billion smartphones — but never reached the people running the roads themselves. Google Maps users contributed billions of movement signals every day; Google rendered them into colour-coded congestion for drivers; and the agencies responsible for the network couldn't see any of it directly.</p>
+    <p class="body rv rv-d1" style="margin-bottom:18px">That changed on <strong>August 25, 2025</strong>. Google announced Roads Management Insights, a Google Maps Platform product purpose-built for public-sector road operators. The launch list was small but globally varied — Colorado DOT on the I-70 corridor, the toll operator Abertis in Spain, and the Greek research institute CERTH among the first to switch on. The data is the same data Google has refined for two decades. What's new is that road authorities can now use it directly.</p>
+    <p class="body rv rv-d2">For TraffiCure, that's the foundation we've been waiting for. We've been a Google Maps Platform partner for fifteen years; RMI is the product that lets us bring Google's data to the cities and DOTs we work with, at a scale and price point nothing else in the market can match.</p>
+  </div>
+</section>
+
+<!-- ============ 03 PRODUCT ============ -->
+<section class="sec stack-card ink" id="product">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow"><span class="num">03</span> · The product, plainly</span>
+      <h2>Three primitives, <em>one pipeline.</em></h2>
+      <p class="lede">RMI is a feed-style product, not a finished application. Three primitives feed one pipeline — and that distinction is the difference between a deployment that ships in eight weeks and one that drifts for eight months.</p>
+    </div>
+    <div class="grid3">
+      <div class="card rv rv-d1">
+        <div class="k">01 · Roads Selection API</div>
+        <h3>Scope the network</h3>
+        <p>Hand Google the network you care about — by polygon, GIS layer, or a list of highway designations — and everything downstream is scoped to it. Pricing scales with the size of the selection.</p>
+        <div class="pipe">→ defines your road graph</div>
+      </div>
+      <div class="card rv rv-d2">
+        <div class="k">02 · BigQuery historical</div>
+        <h3>Travel-time patterns</h3>
+        <p>Typical speeds and travel times by day-of-week and time-of-day, built from months of aggregated movement. The foundation for corridor studies, before/after analysis, and capacity planning.</p>
+        <div class="pipe">→ the "what usually happens"</div>
+      </div>
+      <div class="card rv rv-d3">
+        <div class="k">03 · Pub/Sub real-time</div>
+        <h3>Near-real-time speeds</h3>
+        <p>Current speeds per segment, refreshed about every two minutes. Powers live dashboards, incident detection, and dynamic re-routing. Not sub-second — so not for signal control — but fast enough for everything on a screen.</p>
+        <div class="pipe">→ the "what is happening"</div>
+      </div>
+    </div>
+    <p class="body rv rv-d2" style="margin-top:30px;color:var(--paper-45)"><strong style="color:var(--pulse)">What you don't get from Google:</strong> dashboards, alerts, incident correlation, stakeholder reports, or any user interface. RMI is plumbing. Everything operators actually see and act on is built by your team, a partner, or a platform like TraffiCure that ships those layers pre-built. Agencies that self-build the layer above routinely underestimate it — that's four to six months of focused engineering, even with a strong team.</p>
+  </div>
+</section>
+
+<!-- ============ 04 BRAND NEW ============ -->
+<section class="sec stack-card paper">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="badge live" style="margin-bottom:22px"><span class="dot"></span>Just shipped · May 2026</span>
+      <h2>What Google added this <em>month.</em></h2>
+      <p class="lede">In the first week of May 2026, Google extended RMI with three new experimental feeds. Each is meaningful alone. Stacked, they take RMI from a speed-and-travel-time service into something close to a full operational picture.</p>
+    </div>
+    <div class="feed-grid">
+      <div class="feed rv rv-d1">
+        <div class="meta">Vehicle counts · hourly</div>
+        <h3>Counts without a sensor</h3>
+        <p class="tagline">How many vehicles passed a point, every hour.</p>
+        <p>Anonymized hourly vehicle counts per segment — for capacity studies, signal-cycle tuning, and before/after analysis that used to need a roadside sensor.</p>
+      </div>
+      <div class="feed rv rv-d2">
+        <div class="meta">Harsh-braking · point data</div>
+        <h3>The safety signal nobody else has</h3>
+        <p class="tagline">Risk you can see before the crashes.</p>
+        <p>Anonymized harsh-braking events at intersection scale — the first proxy for road-design risk at network scale, visible without new instrumentation, ahead of the crash data that follows.</p>
+      </div>
+      <div class="feed rv rv-d3">
+        <div class="meta">User-reported incidents</div>
+        <h3>The crowd as your incident feed</h3>
+        <p class="tagline">Higher recall than cameras.</p>
+        <p>The same accident, hazard, and stopped-vehicle reports Maps users submit in-app, now piped to your operations centre — faster than call-centre workflows.</p>
+        <div class="timeline">
+          <div class="tl-row acc"><span class="t">2m</span><span class="e">Accident reported</span></div>
+          <div class="tl-row stop"><span class="t">11m</span><span class="e">Stopped vehicle</span></div>
+          <div class="tl-row clear"><span class="t">18m</span><span class="e">Cleared</span></div>
+          <div class="tl-row haz"><span class="t">23m</span><span class="e">Hazard · debris</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="quote rv rv-d1">
+      <p>"The biggest unlock is simulation. Until this month, RMI gave us the 'what is happening.' Now we can model the 'what if.'"</p>
+      <div class="cite">— Field notes, Section 09 · on the May 2026 release</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 WHAT CHANGES ============ -->
+<section class="sec stack-card ink">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow"><span class="num">05</span> · What changes</span>
+      <h2>What RMI changes for the people who <em>run the roads.</em></h2>
+    </div>
+    <div class="changes">
+      <div class="change rv rv-d1">
+        <h3><span class="lab">It changes</span> what you see.</h3>
+        <p>Most cities saw the 3% of network covered by cameras and maybe 15% by Bluetooth detectors. The other 80%+ was operationally invisible. RMI fills almost all of it, almost immediately, with no hardware to install.</p>
+      </div>
+      <div class="change rv rv-d1">
+        <h3><span class="lab">It changes</span> how fast you know.</h3>
+        <p>The old incident workflow — citizen calls, centre logs, unit dispatched, unit reports back — takes 15 to 90 minutes. RMI compresses the first half: the network itself tells you something is wrong in roughly two minutes.</p>
+      </div>
+      <div class="change rv rv-d2">
+        <h3><span class="lab">It changes</span> what you can argue for.</h3>
+        <p>Before/after corridor performance becomes legible in days, not quarters. A signal retiming, a one-way conversion, a bus-lane experiment — each one becomes evidence. That changes which projects get funded and which get killed.</p>
+      </div>
+      <div class="change rv rv-d2">
+        <h3><span class="lab">It changes</span> what you can answer.</h3>
+        <p>"Is traffic getting better or worse?" Until RMI the honest answer was "we don't know at that granularity." Now it's yes or no — by corridor, by hour, by week. That's a different kind of agency than most departments are used to.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 COMPARE ============ -->
+<section class="sec stack-card paper">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow"><span class="num">06</span> · Compare</span>
+      <h2>How RMI compares to what you <em>have today.</em></h2>
+      <p class="lede">The honest answer to "should we replace what we have?" is almost never all-or-nothing — it's a hybrid that depends on the corridors and the decisions. Here's the dimensional view from a team that's deployed RMI alongside INRIX, TomTom Move, and sensors.</p>
+    </div>
+    <div class="tbl-scroll rv rv-d1">
+      <table class="cmp">
+        <thead>
+          <tr><th>Dimension</th><th>RMI</th><th>INRIX / TomTom / Sensors</th><th>Where each wins</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="dim">Data source</td><td class="rmi">Google Maps consumer movement</td><td class="alt">Fleet / probe / hardware</td><td class="win">RMI on consumer corridors</td></tr>
+          <tr><td class="dim">Coverage</td><td class="rmi">All mapped roads</td><td class="alt">Strong where installed</td><td class="win">RMI for network-wide visibility</td></tr>
+          <tr><td class="dim">Refresh rate</td><td class="rmi">~2 min (near-real-time)</td><td class="alt">1–5 min / sub-second (sensors)</td><td class="win">Sensors for signal control</td></tr>
+          <tr><td class="dim">Deploy time</td><td class="rmi">4–8 weeks with a partner</td><td class="alt">6–12 wks / 6–24 mo (sensors)</td><td class="win">RMI by a wide margin</td></tr>
+          <tr><td class="dim">Cost shape</td><td class="rmi">Subscription, scales with km</td><td class="alt">Subscription / heavy CAPEX</td><td class="win">RMI at par or cheaper at scale</td></tr>
+          <tr><td class="dim">Best for</td><td class="rmi">Network planning + live ops</td><td class="alt">Freight / signal control / legal counts</td><td class="win">Hybrid for most agencies</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="body rv rv-d2" style="margin-top:26px">The short version: RMI is the strongest option for most planning, analytics, and operations on consumer-heavy networks. It is <strong>not</strong> the right call for adaptive signal control, freight-only corridors, or any decision that legally requires a calibrated flow count — there, sensors and fleet providers still win.</p>
+  </div>
+</section>
+
+<!-- ============ 07 LIMITS ============ -->
+<section class="sec stack-card paper" style="padding-top:0">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow"><span class="num">07</span> · Limits</span>
+      <h2>What RMI can't do — yet, or <em>ever.</em></h2>
+      <p class="lede">We're a Google partner. We're also honest about where the product falls short, because that's what separates pilots that ship from pilots that stall. Four limits matter operationally; the rest are footnotes.</p>
+    </div>
+    <div class="limits">
+      <div class="limit rv rv-d1">
+        <h3>Sparse on quiet roads</h3>
+        <p>Rural segments and low-traffic suburbs thin out, especially overnight. When users on a segment drop below Google's k-anonymity threshold, it goes dark for that interval. Invisible for most cities; real for DOTs covering rural freeways at 2am.</p>
+      </div>
+      <div class="limit rv rv-d1">
+        <h3>No commercial-only visibility</h3>
+        <p>RMI sees the consumer fleet. Freight-only corridors and private bus lanes under-report. If your decision depends on commercial-vehicle behaviour, pair RMI with INRIX or TomTom Move, both built on fleet GPS.</p>
+      </div>
+      <div class="limit rv rv-d2">
+        <h3>Not for signal control</h3>
+        <p>The two-minute cadence is fine for dashboards, incident detection, and operator awareness. It is not fine for adaptive signal control or ramp metering. Loop detectors and radar stay in the picture; RMI complements them.</p>
+      </div>
+      <div class="limit rv rv-d2">
+        <h3>Raw feed only</h3>
+        <p>RMI ships dashboards, alerts, incident correlation, and stakeholder reporting in exactly zero quantity. You build it, buy it, or pick a platform that ships it pre-built — factor four to six months into any self-build estimate.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 ACTIVATION ============ -->
+<section class="sec stack-card ink">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow"><span class="num">08</span> · Activation</span>
+      <h2>Three ways to get RMI into <em>production.</em></h2>
+      <p class="lede">RMI is sold through the Google Maps Platform partner network, so there are exactly three reasonable procurement paths. They differ on who holds the contract and how fast you reach a production dashboard — not on the data, which is identical once activated.</p>
+    </div>
+    <div class="paths">
+      <div class="path rv rv-d1">
+        <div class="p-k">Path A</div>
+        <h3>Buy RMI + activation together</h3>
+        <p>One contract with a GMP partner who resells the RMI licence and ships the decision platform on top. We operate this directly in India and the UAE as Lepton, and through partners elsewhere.</p>
+        <div class="speed"><b>4–8 weeks</b> signature → production</div>
+      </div>
+      <div class="path rv rv-d2">
+        <div class="p-k">Path B</div>
+        <h3>Partner-led with your SI</h3>
+        <p>Your systems integrator or cloud partner sells the RMI licence; we plug in as the activation layer. Right path if you already have an SI relationship and procurement underway. Same final product, more contractual surface.</p>
+        <div class="speed"><b>4–8 weeks</b> with existing SI</div>
+      </div>
+      <div class="path rv rv-d3">
+        <div class="p-k">Path C</div>
+        <h3>Activate a subscription you have</h3>
+        <p>Already bought RMI from Google with data landing in BigQuery? Connect a decision platform to the existing Pub/Sub stream and BigQuery tables. You keep your Google contract; we add the activation layer.</p>
+        <div class="speed"><b>2–4 weeks</b> — plumbing already exists</div>
+      </div>
+    </div>
+    <p class="body" style="color:var(--paper-45)">Pricing for RMI itself is set by Google and scopes to network size, refresh frequency, and geography. Activation-layer pricing depends on users, operations centres, and GIS integration. Neither has public list pricing — both are scoped per agency. We'll give you a real number on a 30-minute call.</p>
+  </div>
+</section>
+
+<!-- ============ 09 FROM THE FIELD ============ -->
+<section class="sec paper">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow"><span class="num">09</span> · From the field</span>
+      <h2 style="color:var(--ink)">What eight months of deployments <em>taught us.</em></h2>
+    </div>
+    <div class="notes" style="--paper-20:var(--ink-12)">
+      <div class="note rv rv-d1" style="border-top-color:var(--ink-12)">
+        <div class="n">01</div>
+        <div>
+          <h3 style="color:var(--ink)">The dashboards everyone needs look the same. <em style="color:var(--leaf)">The logic underneath doesn't.</em></h3>
+          <p style="color:var(--ink-45)">Across cities of wildly different size, the first three dashboards are nearly identical: live network speed map, incident-feed timeline, "is this worse than yesterday" corridor view. Those are packageable. The alert logic and metrics underneath — which corridors, which thresholds, how alerts route — must be tuned per city. That's the work that turns a generic product into something a city uses daily.</p>
+        </div>
+      </div>
+      <div class="note rv rv-d1" style="border-top-color:var(--ink-12)">
+        <div class="n">02</div>
+        <div>
+          <h3 style="color:var(--ink)">Real-time adoption was <em style="color:var(--leaf)">the surprise.</em></h3>
+          <p style="color:var(--ink-45)">We expected planners to be the heaviest users. Instead, cities adopt RMI fastest for live operations — for the first time they have a network-wide layer of what's happening right now. That shifts the control room from reactive to proactive. Once a room has watched the network move in real time for a week, going back isn't an option anyone wants.</p>
+        </div>
+      </div>
+      <div class="note rv rv-d2" style="border-top-color:var(--ink-12)">
+        <div class="n">03</div>
+        <div>
+          <h3 style="color:var(--ink)">"Before and after" is the highest-value use case <em style="color:var(--leaf)">nobody talks about.</em></h3>
+          <p style="color:var(--ink-45)">Every authority has at least one signal retiming or geometric change they argued about for months. Once RMI is live, that argument resolves in a week, with evidence. That single use case has paid for the deployment in three of our four enterprise contracts so far.</p>
+        </div>
+      </div>
+      <div class="note rv rv-d2" style="border-top-color:var(--ink-12)">
+        <div class="n">04</div>
+        <div>
+          <h3 style="color:var(--ink)">The biggest May 2026 unlock is <em style="color:var(--leaf)">simulation.</em></h3>
+          <p style="color:var(--ink-45)">RMI gave us "what is happening" and "what usually happens." With vehicle counts and the new incident feeds, we can build genuine simulation and forecasting on the same pipeline: capacity scenarios, signal-cycle what-ifs, incident-response predictions, network-wide impact studies. The layer cities have asked for since the beginning — possible the day Google shipped these feeds.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10 CLOSER + CTA ============ -->
+<section class="sec ink closer" id="contact">
+  <div class="wrap">
+    <span class="eyebrow rv"><span class="num">10</span> · The shape of the next year</span>
+    <h2 class="rv rv-d1">RMI becomes <em>load-bearing.</em></h2>
+    <p class="lede rv rv-d1">The most likely thing over the next twelve months is that RMI becomes infrastructure for cities and DOTs the way Google Maps became infrastructure for navigation. Once an authority has watched the network move in real time for a quarter, paying a third party for data it never owned starts to feel anachronistic. The teams that move first spend the year learning to ask better questions. The teams that wait spend it wondering whether to switch.</p>
+    <div class="cta-band rv rv-d2" style="--ink-12:var(--paper-20);background:rgba(239,255,246,.04)">
+      <div class="ct">
+        <h3 style="color:var(--paper)">Activating RMI for your city or DOT?</h3>
+        <p style="color:var(--paper-45)">We'll bring a working dashboard with your road network loaded — built live on the call.</p>
+      </div>
+      <a class="btn btn-mint" href="#">Book a 30-min demo <span class="arr">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec paper">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">FAQ</span>
+      <h2>Frequently asked <em>questions.</em></h2>
+    </div>
+    <div class="faq rv rv-d1">
+      <details class="q"><summary>What is Roads Management Insights (RMI)?</summary><div class="a">A Google Maps Platform product launched on August 25, 2025 that gives public-sector road operators access to anonymized, aggregated traffic data from Google Maps. It delivers historical travel-time patterns and near-real-time speed intervals through BigQuery, Pub/Sub, and the Roads Selection API.</div></details>
+      <details class="q"><summary>Who is RMI for?</summary><div class="a">Government road operators: state DOTs, municipal traffic departments, regional planning organizations, toll authorities, and public utilities. It is not designed for private fleets, logistics operators, or consumer apps. Named early adopters include Colorado DOT, Abertis (Spain), and CERTH (Greece).</div></details>
+      <details class="q"><summary>How does RMI get its data?</summary><div class="a">It aggregates anonymized movement signals from Google Maps users driving the roads you select. Outputs are speed and travel-time aggregates at the road-segment level, with no personal data exposed. Google applies k-anonymity thresholds before any data leaves the platform.</div></details>
+      <details class="q"><summary>How often does RMI data refresh?</summary><div class="a">Near-real-time speed data updates approximately every 2 minutes; historical patterns update on a rolling basis. In our deployments the 2-minute cadence holds consistently during peak hours, with occasional lag on low-volume rural segments.</div></details>
+      <details class="q"><summary>How is RMI delivered?</summary><div class="a">Through three channels: the Roads Selection API (define your network), BigQuery tables (historical and batch), and Pub/Sub streams (real-time). It is not a finished dashboard product — agencies build or buy a visualization and decision layer on top.</div></details>
+      <details class="q"><summary>What's new in RMI as of May 2026?</summary><div class="a">Three experimental feeds added in the first week of May 2026: anonymized vehicle counts per segment, harsh-braking event clusters at intersection scale, and crowdsourced incident reports from Maps users. All three are flagged experimental; schemas may shift before general availability.</div></details>
+      <details class="q"><summary>Can RMI vehicle counts replace inductive loop detectors?</summary><div class="a">For planning, capacity studies, and signal-cycle analysis, RMI counts can replace most loop-detector deployments. For signal-control loops, tolling enforcement, and legally-required calibrated flow measurement, sensors remain necessary. The realistic pattern is hybrid.</div></details>
+      <details class="q"><summary>What are harsh-braking events used for?</summary><div class="a">Clusters surface intersections where drivers repeatedly slam on the brakes — a strong proxy for road-design risk. Cities use them for proactive safety remediation, before the matching crashes show up in police data. It's the first sub-network safety signal that needs no new instrumentation.</div></details>
+      <details class="q"><summary>Are user-reported incidents reliable enough for operations?</summary><div class="a">Recall is far higher than CCTV-based detection because the user network is millions of times denser. Precision needs light validation; most platforms cross-check against the speed feed. We've found the combined signal more useful than CCTV alone within the first two weeks of any deployment.</div></details>
+      <details class="q"><summary>How much does RMI cost?</summary><div class="a">Google has not published public list pricing. It's scoped per agency based on road-network size, refresh frequency, and data volume, negotiated through Google Maps Platform partners. As a 15-year GMP partner and reseller in India and UAE, Lepton can provide a scoped quote on request.</div></details>
+      <details class="q"><summary>Is RMI available in my country?</summary><div class="a">It's available globally wherever Google Maps has consumer movement data — most of North America, Europe, the Middle East, and major Asian markets. Density varies by region; urban areas perform strongest. In India and UAE, Lepton sells RMI directly as an authorized reseller.</div></details>
+      <details class="q"><summary>RMI vs INRIX vs TomTom Move — what's the real difference?</summary><div class="a">RMI uses Google Maps consumer movement data with deep coverage on consumer-heavy corridors and a ~2-minute refresh. INRIX and TomTom Move use fleet, GPS, and probe data, often stronger on commercial-only routes. RMI is typically more cost-effective for networks over 5,000 km.</div></details>
+      <details class="q"><summary>Can RMI replace traffic sensors entirely?</summary><div class="a">For most planning and corridor analytics, RMI can replace or significantly reduce sensor dependency. For signal control, tolling, and legally-required flow measurement, sensors remain necessary.</div></details>
+      <details class="q"><summary>We already bought RMI from Google. How do we actually use it?</summary><div class="a">With an active subscription, the fastest path to value is activation. TraffiCure plugs into your existing BigQuery project and Pub/Sub streams and ships pre-built dashboards, alerting, and incident workflows in 2 to 4 weeks. You keep your Google contract; we add the activation layer.</div></details>
+      <details class="q"><summary>Is RMI data GDPR-compliant?</summary><div class="a">RMI outputs contain no personally identifiable information. All data is aggregated at the road-segment level with k-anonymity thresholds applied by Google. The product is designed to meet GDPR, India's DPDP Act, and comparable regimes. Agencies remain data controllers for downstream use; Google is a processor.</div></details>
+      <details class="q"><summary>How long does end-to-end RMI deployment take?</summary><div class="a">Core onboarding (contract, Roads Selection API, first BigQuery data) typically takes 2 to 4 weeks with a GMP partner. Full activation with a decision platform like TraffiCure adds another 2 to 4 weeks — a total of 4 to 8 weeks from signature to production use.</div></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="lockup">Traffi<em>Cure</em></div>
+  <div class="meta">Software-only traffic intelligence · Built on Google Maps · Lepton — 15-year GMP partner</div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ document.documentElement.classList.remove('anim'); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+})();
+</script>
+<script>
+/* Stacking-cards recede: as the next panel slides up over the current
+   one, scale + dim + nudge the current panel back. Desktop + motion-ok. */
+(function(){
+  var mqW = window.matchMedia('(min-width:900px)');
+  var mqR = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var cards = [].slice.call(document.querySelectorAll('.stack-card'));
+  if(!cards.length) return;
+  var ticking = false;
+  function active(){ return mqW.matches && !mqR.matches; }
+  function frame(){
+    ticking = false;
+    if(!active()){ cards.forEach(function(c){ c.style.transform=''; c.style.filter=''; }); return; }
+    var vh = window.innerHeight;
+    for(var i=0;i<cards.length;i++){
+      var next = cards[i+1], p = 0;
+      if(next){
+        var nt = next.getBoundingClientRect().top;
+        p = 1 - Math.min(Math.max(nt / vh, 0), 1);   /* 0 → covered:1 */
+      }
+      var e = p<0?0:p>1?1:p;
+      var scale = 1 - 0.055 * e;
+      var ty    = -24 * e;
+      cards[i].style.transform = 'translateY(' + ty + 'px) scale(' + scale + ')';
+      cards[i].style.filter    = 'brightness(' + (1 - 0.5 * e) + ')';
+    }
+  }
+  function onScroll(){ if(!ticking){ ticking = true; requestAnimationFrame(frame); } }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+  if(mqW.addEventListener){ mqW.addEventListener('change', onScroll); mqR.addEventListener('change', onScroll); }
+  frame();
+})();
+</script>
+<script src="js/page-transition.js"></script>
+</body>
+</html>

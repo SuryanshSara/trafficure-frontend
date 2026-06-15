@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrafficCure — Real-time traffic intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- floating globe -> radial nav disk -->
+<button class="orb" id="navOrb" aria-expanded="false" aria-controls="navDisk" aria-label="Open menu">
+  <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <circle cx="18" cy="18" r="14"/>
+    <ellipse cx="18" cy="18" rx="6.5" ry="14"/>
+    <path d="M4 18h28M6.5 11h23M6.5 25h23"/>
+    <circle cx="18" cy="4"  r="1.6" fill="currentColor" stroke="none"/>
+    <circle cx="11.5" cy="18" r="1.6" fill="currentColor" stroke="none"/>
+    <circle cx="27" cy="25" r="1.6" fill="currentColor" stroke="none"/>
+  </svg>
+</button>
+
+<div class="nav-wrap" id="navDisk" hidden>
+  <div class="nav-veil" data-close></div>
+  <nav class="nav-disk" aria-label="Site">
+    <ul class="nav-ring">
+      <li><a href="#data"        style="--i:0">THE DATA</a></li>
+      <li><a href="#features"    style="--i:1">FEATURES</a></li>
+      <li><a href="rmi.html"     style="--i:2">RMI</a></li>
+      <li><a href="#deployments" style="--i:3">WHY US</a></li>
+      <li><a href="blog.html"    style="--i:4">BLOG</a></li>
+      <li><a href="#"            style="--i:5">TOOLS</a></li>
+      <li><a href="#"            style="--i:6">SIGN IN</a></li>
+      <li><a href="#contact" class="cta" style="--i:7">BOOK A DEMO&ensp;&rarr;</a></li>
+    </ul>
+    <button class="nav-close" data-close aria-label="Close menu">&times;</button>
+  </nav>
+</div>
+
+
+<canvas id="halftone"></canvas>
+
+<div class="ui">
+  <div class="rule r1"></div>
+  <div class="rule r2"></div>
+
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+        <circle cx="10" cy="10" r="7"/><path d="M10 0v6M10 14v6M0 10h6M14 10h6"/>
+      </svg>
+      TRAFFI<em style="font-family:'Fraunces',serif;font-style:italic;text-transform:none;font-size:13px;">Cure</em>
+    </div>
+  </header>
+
+  <div class="hero-left">
+    <span class="badge">POWERED BY GOOGLE MAPS</span>
+    <h1>
+      <span class="row">See every road.</span>
+      <span class="row">Predict <em>every jam.</em></span>
+    </h1>
+    <div class="ctas">
+      <a class="btn btn-solid" href="#">REQUEST A DEMO&ensp;&rarr;</a>
+      <a class="btn btn-ghost" href="#">SEE THE DATA</a>
+    </div>
+  </div>
+
+  <div class="status">
+    <span class="dot" id="statusDot"></span>
+    <span id="statusText">HOVER A ROUTE — LIVE NETWORK</span>
+  </div>
+
+  <div class="ticks">100% SOFTWARE&ensp;&middot;&ensp;DEPLOYS IN WEEKS&ensp;&middot;&ensp;EVERY ROAD, EVERY CITY</div>
+</div>
+
+
+<main class="page">
+
+  <!-- ============ 01 · STATEMENT ============ -->
+  <section class="s-statement">
+    <p class="statement" aria-label="TrafficCure turns the road data your city already generates into decisions. One software platform maps congestion on every road, scores it, and shows exactly where signal timing, enforcement, and infrastructure money will move the needle — no cameras, no sensors, no construction.">
+      <span class="ghost" aria-hidden="true">TrafficCure turns the road data your city already generates into decisions. One software platform maps congestion on every road, scores it, and shows exactly where signal timing, enforcement, and infrastructure money will move the needle — no cameras, no sensors, no construction.</span>
+      <span class="live" aria-hidden="true"></span>
+    </p>
+    <div class="stmt-notes">
+      <p class="mono-note reveal">FROM RAW GOOGLE MAPS FEEDS TO BOARD-ROOM
+      REPORTS, TRAFFICURE COVERS THE FULL PIPELINE&mdash;COLLECTION,
+      SCORING, DIAGNOSIS, ACTION.</p>
+      <p class="mono-note reveal">BUILT AROUND RMI, OUR SCORING FRAMEWORK
+      THAT RANKS EVERY ROAD IN THE NETWORK BY CONGESTION SEVERITY.</p>
+    </div>
+  </section>
+
+  <!-- stepped ink -> paper transition -->
+  <div class="step-band" aria-hidden="true">
+    <div class="step sA"></div><div class="step sB"></div><div class="step sC"></div>
+  </div>
+
+  <!-- ============ 02 · BUILT ON GOOGLE MAPS ============ -->
+  <section class="s-gmaps" id="data">
+    <span class="badge badge-paper reveal">LIVE DATA SOURCE</span>
+
+    <h2 class="gm-head reveal">Built on <em>Google&nbsp;Maps.</em><svg class="gm-pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1C6.2 1 1.6 5.6 1.6 11.4c0 7.6 9.1 18.1 9.5 18.6.5.5 1.3.5 1.8 0 .4-.5 9.5-11 9.5-18.6C22.4 5.6 17.8 1 12 1z" fill="var(--leaf)"/><circle cx="12" cy="11.4" r="4.2" fill="var(--paper)"/></svg></h2>
+
+    <p class="gm-sub reveal">Probe data from a billion smartphones, refreshed every
+    two minutes, across every road in your city&thinsp;&mdash;&thinsp;delivered
+    through Google&rsquo;s Roads Management Insights feed.</p>
+
+    <div class="gm-grid">
+
+      <figure class="gm-stage reveal" role="img"
+              aria-label="Halftone dot map of central Delhi. Road routes automatically light up green, amber and red with live speed readings as traffic conditions change.">
+        <div class="gm-map">
+          <canvas id="gmCanvas" aria-hidden="true"></canvas>
+          <div class="gm-chips" aria-hidden="true"></div>
+          <span class="gm-tag-city mono-note" aria-hidden="true">DELHI &mdash; CONNAUGHT PLACE GRID</span>
+        </div>
+        <figcaption class="gm-legend">
+          <span class="lg"><i class="sw sw-clear"></i>CLEAR</span>
+          <span class="lg"><i class="sw sw-slow"></i>SLOW</span>
+          <span class="lg"><i class="sw sw-jam"></i>CONGESTED</span>
+          <span class="lg live"><i class="sw sw-live"></i>LIVE</span>
+        </figcaption>
+      </figure>
+
+      <div class="gm-stats">
+        <div class="gm-stat reveal">
+          <p class="gm-num"><span data-count="2">0</span><em>min</em></p>
+          <p class="gm-label">Network-wide refresh cycle</p>
+          <p class="gm-tag mono-note">REFRESH RATE</p>
+        </div>
+        <div class="gm-stat reveal">
+          <p class="gm-num"><span data-count="1">0</span><em>B+</em></p>
+          <p class="gm-label">Smartphones feeding live speed data</p>
+          <p class="gm-tag mono-note">DATA SOURCES</p>
+        </div>
+        <div class="gm-stat reveal">
+          <p class="gm-num"><span data-count="100">0</span><em>%</em></p>
+          <p class="gm-label">Road coverage, not just camera junctions</p>
+          <p class="gm-tag mono-note">COVERAGE</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 03 · FEATURES ============ -->
+  <section class="s-features" id="features">
+    <h2 class="split-head" aria-label="Features">
+      <span class="half-l" data-slide="-1">Fea</span><span class="half-r" data-slide="1">tures</span>
+    </h2>
+
+    <div class="feat-grid">
+
+      <article class="feature f-alerts reveal" tabindex="0"
+               aria-label="Real-Time Congestion Alerts — hover or focus to preview the product">
+        <div class="flip">
+          <div class="face front">
+            <h3>Real-Time Congestion Alerts</h3>
+            <p class="feat-copy">The moment traffic deviates from normal on any
+            road in the city, your team knows. Alerts push to your command
+            centre, mobile phones, email, or WhatsApp&thinsp;&mdash;&thinsp;so
+            you can intervene before the situation escalates.</p>
+            <ul class="checks">
+              <li>Configurable speed thresholds per corridor</li>
+              <li>Multi-channel delivery &mdash; email, WhatsApp, SMS</li>
+              <li>Live command centre dashboard</li>
+            </ul>
+            <span class="flip-hint">[&ensp;HOVER &mdash; SEE IT LIVE&ensp;]</span>
+          </div>
+          <div class="face back">
+            <img src="assets/feat-alerts.png" alt="Live alerts panel: active congestion alerts with road names, durations and severity">
+          </div>
+        </div>
+      </article>
+
+      <article class="feature f-analytics reveal" tabindex="0"
+               aria-label="Deep Road-Level Analytics — hover or focus to preview the product">
+        <div class="flip">
+          <div class="face front">
+            <h3>Deep Road-Level Analytics</h3>
+            <p class="feat-copy">Go beyond the surface. See speed profiles for
+            any road across 24 hours, compare today against 7-day or 31-day
+            averages, and identify the root cause of recurring congestion
+            patterns.</p>
+            <ul class="checks">
+              <li>24-hour speed profiles for any road</li>
+              <li>Historical comparison &mdash; 7-day and 31-day</li>
+              <li>Network-wide congestion heatmaps</li>
+            </ul>
+            <span class="flip-hint">[&ensp;HOVER &mdash; SEE IT LIVE&ensp;]</span>
+          </div>
+          <div class="face back">
+            <img src="assets/feat-analytics.png" alt="Road analytics card: current vs usual vs free-flow speed and busy-hours heatmap">
+          </div>
+        </div>
+      </article>
+
+      <article class="feature f-reports reveal" tabindex="0"
+               aria-label="Automated Performance Reports — hover or focus to preview the product">
+        <div class="flip">
+          <div class="face front">
+            <h3>Automated Performance Reports</h3>
+            <p class="feat-copy">Daily, weekly, and monthly reports land in your
+            inbox and WhatsApp automatically. No manual data-pulling, no Excel
+            gymnastics. Just clear, consistent proof that your traffic
+            management is working.</p>
+            <ul class="checks">
+              <li>Scheduled delivery via email and WhatsApp</li>
+              <li>Corridor and network-level views</li>
+              <li>Before/after impact measurement</li>
+            </ul>
+            <span class="flip-hint">[&ensp;HOVER &mdash; SEE IT LIVE&ensp;]</span>
+          </div>
+          <div class="face back">
+            <img src="assets/feat-reports.png" alt="Scheduled reports panel: daily, weekly and monthly reports marked active">
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <a class="band-btn feat-band" href="#">VIEW ALL FEATURES</a>
+  </section>
+
+  <!-- ============ 04 · METHOD ============ -->
+  <section class="s-method" id="rmi">
+    <div class="m-rules" aria-hidden="true"><span></span><span></span></div>
+    <h2 class="method-head reveal">From data<br>to <em>cure</em></h2>
+    <div class="cards">
+      <article class="card c1" data-rot="-6.5" data-x="-14">
+        <div class="card-inner">
+          <header><h3>Measure</h3><span class="num">01</span></header>
+          <p class="mono-note">EVERY ROAD SCORED FROM LIVE GOOGLE MAPS
+          DATA&mdash;NO HARDWARE ON THE GROUND.</p>
+        </div>
+      </article>
+      <article class="card c2" data-rot="5.5" data-x="18">
+        <div class="card-inner">
+          <header><h3>Diagnose</h3><span class="num">02</span></header>
+          <p class="mono-note">RMI RANKS CHOKE POINTS AND FAILING CORRIDORS,
+          SO YOU KNOW EXACTLY WHERE TO ACT.</p>
+        </div>
+      </article>
+      <article class="card c3" data-rot="-4.5" data-x="-9">
+        <div class="card-inner">
+          <header><h3>Treat</h3><span class="num">03</span></header>
+          <p class="mono-note">SIGNAL, ENFORCEMENT, AND INFRASTRUCTURE FIXES
+          &mdash;TRACKED BEFORE AND AFTER.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 05 · COMPARE ============ -->
+  <section class="s-compare" id="deployments">
+    <h2 class="cmp-head reveal">See how TraffiCure<br><em>compares.</em></h2>
+    <p class="cmp-sub reveal">If your city already has camera-based ITMS, TraffiCure
+    works alongside it&thinsp;&mdash;&thinsp;filling the gaps hardware can't reach.</p>
+
+    <div class="cmp-wrap reveal">
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col">TraffiCure</th>
+            <th scope="col">Camera ITMS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="--i:0"><th scope="row">Network Coverage</th><td class="tc">100%</td><td class="itms">15-20%</td></tr>
+          <tr style="--i:1"><th scope="row">Deployment Time</th><td class="tc">2-4 weeks</td><td class="itms">2-3 years</td></tr>
+          <tr style="--i:2"><th scope="row">Hardware Required</th><td class="tc">None</td><td class="itms">Cameras, sensors, fiber</td></tr>
+          <tr style="--i:3"><th scope="row">Capex</th><td class="tc">Zero</td><td class="itms">50 Cr+</td></tr>
+          <tr style="--i:4"><th scope="row">Data Freshness</th><td class="tc">Every 2 min</td><td class="itms">Varies</td></tr>
+          <tr style="--i:5"><th scope="row">Predictive Alerts</th><td class="tc">Built-in</td><td class="itms">&mdash;</td></tr>
+          <tr style="--i:6"><th scope="row">Automated Reports</th><td class="tc">Daily / Weekly / Monthly</td><td class="itms">Manual export</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <a class="band-btn center" href="#">SEE HOW TRAFFICURE COMPARES TO INRIX, TOMTOM, HERE &amp; KAPSCH&ensp;&rarr;</a>
+  </section>
+
+  <!-- ============ 06 · CTA ============ -->
+  <section class="s-cta" id="contact">
+    <span class="badge">START SMALL, PROVE IT FAST</span>
+    <h2 class="reveal">Start with <em>one corridor.</em></h2>
+    <div class="ctas">
+      <a class="btn btn-solid" href="#">REQUEST A DEMO&ensp;&rarr;</a>
+      <a class="btn btn-ghost" href="#">SEE THE DATA</a>
+    </div>
+    <p class="cta-ticks">100% SOFTWARE&ensp;&middot;&ensp;DEPLOYS IN WEEKS&ensp;&middot;&ensp;EVERY ROAD, EVERY CITY</p>
+  </section>
+
+</main>
+
+
+<script src="js/map-data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sections.js"></script>
+<script src="js/gm-map-data.js"></script>
+<script src="js/gmaps.js"></script>
+<script src="js/method-map-data.js"></script>
+<script src="js/method-bg.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/page-transition.js"></script>
+</body>
+</html>
